@@ -1,0 +1,50 @@
+---
+ - name   : first setup
+   become : yes
+   hosts  : all
+   
+   tasks  : 
+   
+    - name  : changing base console 
+      shell : cmd=sudo usermod -s /bin/bash {{ ansible_user }} 
+
+    - name  : apt update
+      apt   : upgrade=yes 
+              update_cache=yes
+              cache_valid_time=86400
+
+    - name  : install Time Zone Database  
+      apt   : name=tzdata
+              state=latest
+
+    - name     : setup Moscow timezone 
+      timezone : name="Europe/Moscow"
+
+    - debug : 
+        var : ansible_date_time.time
+    
+    - debug : 
+        var : ansible_date_time.tz_dst
+    
+    - name: change ssh port to 4488
+      replace : path=/etc/ssh/sshd_config
+                regexp="#Port 22"
+                replace="Port 4488"
+
+    - name : restriction root login 
+      replace : path=/etc/ssh/sshd_config
+                regexp="#PermitRootLogin prohibit-password"
+                replace="PermitRootLogin no"
+
+    - name : restriction for PasswordAuthentication
+      lineinfile: dest=/etc/ssh/sshd_config
+                  regexp="^PasswordAuthentication"
+                  line="PasswordAuthentication no"
+
+    - name: Restart sshd
+      service :
+        name  : sshd
+        state : restarted
+
+
+# ansible all -i hosts.txt -m setup
