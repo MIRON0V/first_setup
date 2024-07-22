@@ -1,0 +1,6 @@
+- changing base console
+- apt update
+- changing timezone
+- changing ssh port
+- restriction for root login
+- restriction for PasswordAuthentication
