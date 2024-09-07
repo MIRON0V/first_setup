@@ -2,16 +2,19 @@
  - name   : first setup
    become : yes
    hosts  : all
+
+   vars   : 
+     sshd_port: 4488
    
    tasks  : 
-   
     - name  : changing base console 
       shell : cmd=sudo usermod -s /bin/bash {{ ansible_user }} 
 
-    - name  : apt update
+    - name  : apt upgrading packages and update cache
       apt   : upgrade=yes 
               update_cache=yes
               cache_valid_time=86400
+      when  : ansible_os_family == "Debian" or "Ubuntu"
 
     - name  : install Time Zone Database  
       apt   : name=tzdata
@@ -26,10 +29,10 @@
     - debug : 
         var : ansible_date_time.tz_dst
     
-    - name: change ssh port to 4488
+    - name: change ssh port
       replace : path=/etc/ssh/sshd_config
                 regexp="#Port 22"
-                replace="Port 4488"
+                replace="Port '{{ sshd_port }}'"
 
     - name : restriction root login 
       replace : path=/etc/ssh/sshd_config
@@ -41,10 +44,42 @@
                   regexp="^PasswordAuthentication"
                   line="PasswordAuthentication no"
 
+    - name : coppy ssh_banner 
+      copy : src=./ssh_banner
+             dest=/home/{{ ansible_user }} 
+
+    - name : add banner
+      replace: path=/etc/ssh/sshd_config
+               regexp="#Banner none"
+               replace="Banner /home/{{ ansible_user }}/ssh_banner"
+
     - name: Restart sshd
       service :
         name  : sshd
         state : restarted
+
+    - name: install UFW firewall
+      apt: name=ufw state=latest
+
+    - name: access to tcp port 80 and 443
+      ufw:
+        rule: allow
+        port: '{{ item }}'
+        proto: tcp
+      loop:
+        - 80
+        - 443
+        - '{{ sshd_port }}'
+
+    - name: activate ufw
+      ufw: 
+        state: enabled
+
+    - shell: ufw status verbose
+      register: status
+    
+    - debug: 
+        var : status.stdout_lines
 
 
 # ansible all -i hosts.txt -m setup
