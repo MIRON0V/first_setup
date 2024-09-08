@@ -1,11 +1,11 @@
 Ansible playbook for initial server setup on Ubuntu and Debian. 
 
-Tasks from playbook:
+Tasks from the playbook:
 - change base console
 - apt update
 - change timezone
-- change SSH port
-- disable SSH Root
+- change ssh port
+- disable ssh Root
 - disable password authentication for SSH
 - add ssh banner
 - restart sshd
