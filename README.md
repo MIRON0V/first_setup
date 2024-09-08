@@ -1,6 +1,14 @@
-- changing base console
+Ansible playbook for initial server setup on Ubuntu and Debian. 
+
+Tasks from playbook:
+- change base console
 - apt update
-- changing timezone
-- changing ssh port
-- restriction for root login
-- restriction for PasswordAuthentication
+- change timezone
+- change SSH port
+- disable SSH Root
+- disable password authentication for SSH
+- add ssh banner
+- restart sshd
+- install ufw firewall
+- access to some ports
+- activate ufw
