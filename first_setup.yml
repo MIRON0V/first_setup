@@ -41,7 +41,7 @@
 
     - name : restriction for PasswordAuthentication
       lineinfile: dest=/etc/ssh/sshd_config
-                  regexp="^PasswordAuthentication"
+                  regexp="#PasswordAuthentication yes"
                   line="PasswordAuthentication no"
 
     - name : coppy ssh_banner 
