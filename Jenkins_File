@@ -1,0 +1,71 @@
+pipeline {
+    agent {
+        label 'master'
+    }
+
+    environment {
+        // Path to ansible executables directory. For example - /usr/bin or /opt/homebrew/bin
+        ANSIBLE_HOME = " . . . "
+        // Adding Ansible to PATH 
+        PATH = "${env.ANSIBLE_HOME}:${env.PATH}"
+        // Inventory path 
+        HOSTS = " . . . "
+        // Workspace with playbook 
+        PLAYBOOK = " . . . "
+        // Telegram chat_id
+        CHAT_ID = " . . . "
+        // api.telegram.channel
+        TG_API = "https://api.telegram.org/ . . . "
+    }   
+
+    stages {
+        stage('Git Pull') {
+            steps {
+                git(
+                    branch: "main",
+                    url: "git@github.com:MIRON0V/first_setup.git",
+                    credentialsId: 'git'
+                )
+            }
+        }
+
+        stage('Prepare') {
+            steps {
+                script {
+                    // Check Ansible version
+                    sh 'ansible --version'
+                }
+            }
+        }
+
+        stage('Run Ansible Playbook') {
+            steps {
+                script {
+                    sh '''#!/bin/bash
+                    ${ANSIBLE_HOME}/ansible-playbook -i ${HOSTS} ${PLAYBOOK} 
+                    '''
+                }
+            }
+        }
+    }
+
+    post { 
+        // Telegram notifications 
+        success {
+            sh  ("""
+            curl -X POST -H 'Content-Type: application/json' -d '{"chat_id": "${CHAT_ID}", "text":"[😎SUCCESS] 🚀🔥💪 BREAKTHROUGH 🚀🔥💪", "disable _notification": false}' ${TG_API}         
+            """)
+        }
+
+        aborted {
+            sh  ("""
+            curl -X POST -H 'Content-Type: application/json' -d '{"chat_id": "${CHAT_ID}", "text":"[🫤ABORTED] 😐😑 Job was Finished 😐😑", "disable _notification": false}' ${TG_API} 
+            """)
+        }
+        failure {
+            sh  ("""
+              curl -X POST -H 'Content-Type: application/json' -d '{"chat_id": "${CHAT_ID}", "text":"[🤕FAILURE] 😭😞 The JOB Down 😭😞", "disable _notification": false}' ${TG_API} 
+            """)
+        }
+    }
+}
