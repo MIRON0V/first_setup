@@ -1,6 +1,5 @@
-Ansible playbook for initial server setup on Ubuntu and Debian. 
-
-Tasks from the playbook:
+## Ansible playbook for initial server setup on Ubuntu and Debian. 
+### Tasks from the playbook:
 - change base console
 - apt update
 - change timezone
@@ -12,3 +11,5 @@ Tasks from the playbook:
 - install ufw firewall
 - access to some ports
 - activate ufw
+
+### + Jenkins_File for deploying from the Jenkins 
